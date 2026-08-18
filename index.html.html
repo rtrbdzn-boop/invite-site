@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пригласи.ру — конструктор электронных пригласительных</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Caveat:wght@400;700&family=Pacifico&family=Roboto+Slab:wght@300;400;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== ОСНОВНЫЕ СТИЛИ ===== */
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5a4bd1;
+            --bg: #faf9ff;
+            --text: #2d2a3d;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* ===== ШАПКА ===== */
+        header {
+            background: white;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            cursor: pointer;
+        }
+        .logo span { color: #ff6b6b; }
+        nav { display: flex; gap: 30px; }
+        nav a {
+            font-weight: 500;
+            font-size: 15px;
+            color: #555;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--primary); }
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(108,92,231,0.4); }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover { background: var(--primary); color: white; }
+
+        /* ===== ГЛАВНАЯ СТРАНИЦА ===== */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2d2a3d;
+        }
+        .hero p {
+            font-size: 18px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            margin: 60px 0 40px;
+        }
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            padding-bottom: 60px;
+        }
+        .template-card {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .template-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .template-preview {
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background: #f0f0f0;
+        }
+        .template-info {
+            padding: 20px;
+            text-align: center;
+        }
+        .template-info h3 { font-size: 20px; margin-bottom: 8px; }
+        .template-info p { color: #888; font-size: 14px; margin-bottom: 15px; }
+        .template-info .btn { width: 100%; padding: 10px; font-size: 14px; }
+
+        /* Мини-приглашения в карточках */
+        .mini-invite {
+            width: 200px;
+            height: 300px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            font-family: 'Playfair Display', serif;
+            transition: all 0.3s;
+        }
+        .mini-invite .mini-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
+        .mini-invite .mini-sub { font-size: 12px; margin-bottom: 10px; }
+        .mini-invite .mini-names { font-size: 18px; font-weight: 700; margin: 10px 0; }
+        .mini-invite .mini-date { font-size: 12px; margin-top: 5px; }
+
+        /* Стили мини-шаблонов */
+        .mini-elegant { background: #ffffff; border: 3px double #c9a84c; color: #333; }
+        .mini-watercolor { background: linear-gradient(135deg, #fce4ec, #e8eaf6); border: 2px solid #f8bbd0; color: #5c4d7d; font-family: 'Caveat', cursive; }
+        .mini-minimal { background: #ffffff; border: 1px solid #e0e0e0; color: #2c3e50; font-family: 'Montserrat', sans-serif; border-left: 4px solid #3498db; }
+        .mini-party { background: #1a1a2e; border: 2px solid #ff6b6b; color: #ffd93d; font-family: 'Pacifico', cursive; box-shadow: 0 0 20px rgba(255,107,107,0.3); }
+        .mini-rustic { background: #f5f0e6; border: 2px solid #8b7355; color: #5d4037; font-family: 'Roboto Slab', serif; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(139,115,85,0.05) 10px, rgba(139,115,85,0.05) 20px); }
+        .mini-kids { background: #fff9c4; border: 3px solid #ffcc80; color: #e65100; font-family: 'Nunito', sans-serif; border-radius: 20px; box-shadow: 0 5px 15px rgba(255,183,77,0.3); }
+
+        /* ===== СТРАНИЦА РЕДАКТОРА ===== */
+        #editorPage { display: none; padding: 40px 20px; }
+        #editorPage.active { display: block; }
+        .editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .editor-layout { grid-template-columns: 1fr; }
+        }
+
+        /* Левая колонка — форма */
+        .editor-form label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .editor-form input, .editor-form select, .editor-form textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .editor-form input:focus, .editor-form select:focus, .editor-form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.1);
+        }
+        .color-palette { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .color-option {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .color-option.active { border-color: #333; transform: scale(1.15); }
+
+        /* Правая колонка — предпросмотр */
+        .preview-container {
+            background: #f5f5f5;
+            border-radius: var(--radius);
+            padding: 20px;
+            height: 700px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        .invitation-card {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 12px;
+            padding: 40px 30px;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        /* Секции внутри приглашения */
+        .invite-section {
+            width: 100%;
+            margin: 20px 0;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .invite-section:first-of-type { border-top: none; margin-top: 0; padding-top: 0; }
+        .section-heading {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        .calendar-month-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .calendar-table th, .calendar-table td {
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .calendar-table th {
+            font-weight: 700;
+            opacity: 0.7;
+        }
+        .calendar-table td.selected {
+            font-weight: 700;
+        }
+        .timing-list {
+            list-style: none;
+            text-align: left;
+            margin: 10px 0;
+        }
+        .timing-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+        }
+        .timing-time {
+            font-weight: 700;
+            min-width: 60px;
+        }
+        .location-block {
+            margin: 15px 0;
+        }
+        .map-placeholder {
+            width: 100%;
+            height: 150px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* Стили полноразмерных шаблонов */
+        .tpl-elegant { background: #ffffff; border: 5px double #c9a84c; color: #333; font-family: 'Playfair Display', serif; }
+        .tpl-elegant .invite-title { color: #c9a84c; font-size: 28px; }
+        .tpl-elegant .invite-names { font-size: 30px; color: #333; }
+        .tpl-elegant .section-heading { color: #c9a84c; }
+
+        .tpl-watercolor { background: linear-gradient(135deg, #fce4ec, #e8eaf6); border: 2px solid #f8bbd0; color: #5c4d7d; font-family: 'Caveat', cursive; font-size: 18px; }
+        .tpl-watercolor .invite-title { font-size: 30px; }
+        .tpl-watercolor .invite-names { font-size: 28px; }
+        .tpl-watercolor .section-heading { color: #5c4d7d; }
+
+        .tpl-minimal { background: #ffffff; border: 1px solid #e0e0e0; color: #2c3e50; font-family: 'Montserrat', sans-serif; border-left: 8px solid #3498db; }
+        .tpl-minimal .invite-title { font-size: 26px; font-weight: 600; }
+        .tpl-minimal .invite-names { font-size: 28px; font-weight: 600; }
+        .tpl-minimal .section-heading { color: #3498db; }
+
+        .tpl-party { background: #1a1a2e; border: 3px solid #ff6b6b; color: #ffd93d; font-family: 'Pacifico', cursive; box-shadow: 0 0 40px rgba(255,107,107,0.4); }
+        .tpl-party .invite-title { font-size: 26px; }
+        .tpl-party .invite-names { font-size: 30px; }
+        .tpl-party .section-heading { color: #ff6b6b; }
+
+        .tpl-rustic { background: #f5f0e6; border: 3px solid #8b7355; color: #5d4037; font-family: 'Roboto Slab', serif; background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(139,115,85,0.08) 15px, rgba(139,115,85,0.08) 30px); }
+        .tpl-rustic .invite-title { font-size: 28px; }
+        .tpl-rustic .invite-names { font-size: 28px; }
+        .tpl-rustic .section-heading { color: #8b7355; }
+
+        .tpl-kids { background: #fff9c4; border: 4px solid #ffcc80; color: #e65100; font-family: 'Nunito', sans-serif; border-radius: 24px; box-shadow: 0 8px 25px rgba(255,183,77,0.4); }
+        .tpl-kids .invite-title { font-size: 28px; }
+        .tpl-kids .invite-names { font-size: 28px; }
+        .tpl-kids .section-heading { color: #ff9800; }
+
+        /* Кнопки действий */
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .modal-actions .btn { flex: 1; min-width: 150px; text-align: center; }
+
+        /* Форма заказа */
+        .order-form {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+            max-width: 600px;
+        }
+        .order-form.active { display: block; }
+        .order-form h3 { margin-bottom: 20px; font-family: 'Playfair Display', serif; }
+
+        /* ===== РЕЖИМ ПРОСМОТРА ===== */
+        #viewPage {
+            display: none;
+            padding: 40px 20px;
+        }
+        #viewPage.active {
+            display: block;
+        }
+        .view-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        .view-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .view-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+        }
+        .view-header p {
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Модальное окно для публикации */
+        .publish-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .publish-modal.active {
+            display: flex;
+        }
+        .publish-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+        .publish-modal-content h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+        .publish-link {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ===== ФУТЕР ===== */
+        footer {
+            background: #2d2a3d;
+            color: #aaa;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+        footer .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        footer p { font-size: 14px; }
+
+        /* Адаптивность */
+        @media (max-width: 600px) {
+            .header-inner { flex-direction: column; gap: 10px; }
+            nav { gap: 15px; flex-wrap: wrap; justify-content: center; }
+            .hero h1 { font-size: 32px; }
+            .invitation-card { padding: 25px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ШАПКА -->
+    <header>
+        <div class="header-inner">
+            <div class="logo" onclick="goHome()">Пригласи<span>.</span>ру</div>
+            <nav>
+                <a href="#" onclick="goHome()">Главная</a>
+                <a href="#" onclick="scrollToTemplates()">Шаблоны</a>
+                <a href="#">Контакты</a>
+            </nav>
+            <a href="#" class="btn" onclick="scrollToTemplates()">Создать приглашение</a>
+        </div>
+    </header>
+
+    <!-- ГЛАВНАЯ СТРАНИЦА -->
+    <div id="homePage">
+        <section class="hero">
+            <h1>Электронные пригласительные<br>для вашего события</h1>
+            <p>Выберите шаблон, добавьте календарь, тайминг, место и отправьте гостям за пару минут.</p>
+            <a href="#" class="btn" onclick="scrollToTemplates()">Выбрать шаблон</a>
+        </section>
+
+        <section id="templatesSection" class="container">
+            <h2 class="section-title">Наши шаблоны</h2>
+            <div class="templates-grid" id="templatesGrid">
+                <!-- Заполняется JS -->
+            </div>
+        </section>
+    </div>
+
+    <!-- СТРАНИЦА РЕДАКТОРА -->
+    <div id="editorPage">
+        <div class="editor-layout">
+            <!-- Левая колонка: форма -->
+            <div class="editor-form">
+                <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 20px;">Редактор приглашения</h2>
+                <label>Заголовок</label>
+                <input type="text" id="inviteTitle" value="Свадьба">
+
+                <label>Имена</label>
+                <input type="text" id="inviteNames" value="Александр и Екатерина">
+
+                <label>Дата события (строка)</label>
+                <input type="text" id="inviteDate" value="15 июня 2025">
+
+                <label>День (для календаря)</label>
+                <input type="number" id="calDay" value="15" min="1" max="31">
+
+                <label>Месяц</label>
+                <select id="calMonthSelect">
+                    <option value="0">Январь</option>
+                    <option value="1">Февраль</option>
+                    <option value="2">Март</option>
+                    <option value="3">Апрель</option>
+                    <option value="4">Май</option>
+                    <option value="5" selected>Июнь</option>
+                    <option value="6">Июль</option>
+                    <option value="7">Август</option>
+                    <option value="8">Сентябрь</option>
+                    <option value="9">Октябрь</option>
+                    <option value="10">Ноябрь</option>
+                    <option value="11">Декабрь</option>
+                </select>
+
+                <label>Год</label>
+                <input type="number" id="calYear" value="2025" min="2020" max="2030">
+
+                <label>Место (кратко)</label>
+                <input type="text" id="invitePlace" value="Ресторан «Ласточка»">
+
+                <label>Адрес (полностью)</label>
+                <input type="text" id="locationAddress" value="г. Москва, ул. Примерная, д. 1">
+
+                <label>Ссылка на карту (embed)</label>
+                <input type="text" id="locationMap" placeholder="Вставьте iframe или ссылку" value="">
+
+                <label>Тайминг (каждая строка: время – событие)</label>
+                <textarea id="timingText" rows="6">15:00 – Сбор гостей
+16:00 – Церемония
+17:00 – Банкет</textarea>
+
+                <label>Дополнительный текст</label>
+                <textarea id="inviteSub" rows="3">Дорогие гости! Ждём вас на нашем празднике!</textarea>
+
+                <label>Цвет текста</label>
+                <div class="color-palette" id="colorPalette">
+                    <div class="color-option active" style="background:#333;" data-color="#333"></div>
+                    <div class="color-option" style="background:#c9a84c;" data-color="#c9a84c"></div>
+                    <div class="color-option" style="background:#e74c3c;" data-color="#e74c3c"></div>
+                    <div class="color-option" style="background:#2ecc71;" data-color="#2ecc71"></div>
+                    <div class="color-option" style="background:#3498db;" data-color="#3498db"></div>
+                    <div class="color-option" style="background:#9b59b6;" data-color="#9b59b6"></div>
+                    <div class="color-option" style="background:#ffffff; border:1px solid #ddd;" data-color="#ffffff"></div>
+                </div>
+
+                <label>Шрифт</label>
+                <select id="fontSelect">
+                    <option value="'Playfair Display', serif">Playfair Display</option>
+                    <option value="'Caveat', cursive">Caveat</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                    <option value="'Pacifico', cursive">Pacifico</option>
+                    <option value="'Roboto Slab', serif">Roboto Slab</option>
+                    <option value="'Nunito', sans-serif">Nunito</option>
+                </select>
+
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="printBtn">🖨 Распечатать</button>
+                    <button class="btn" id="orderBtn">📩 Заказать</button>
+                    <button class="btn" id="publishBtn" style="background:#28a745;">🔗 Опубликовать</button>
+                </div>
+
+                <!-- Форма заказа (скрыта) -->
+                <div class="order-form" id="orderForm">
+                    <h3>Оформление заказа</h3>
+                    <p style="margin-bottom: 20px; color:#666;">Оставьте контакты — мы свяжемся с вами.</p>
+                    <label>Ваше имя</label>
+                    <input type="text" id="customerName" placeholder="Иван Иванов">
+                    <label>Телефон или Email</label>
+                    <input type="text" id="customerContact" placeholder="+7 (900) 123-45-67">
+                    <label>Комментарий</label>
+                    <textarea id="customerComment" rows="2" placeholder="Комментарий к заказу..."></textarea>
+                    <button class="btn" id="submitOrder" style="width:100%;">Отправить заявку</button>
+                </div>
+            </div>
+
+            <!-- Правая колонка: предпросмотр с прокруткой -->
+            <div class="preview-container" id="previewContainer">
+                <div class="invitation-card tpl-elegant" id="invitationPreview">
+                    <!-- Заголовок -->
+                    <div class="invite-title" id="previewTitle">Свадьба</div>
+                    <div class="invite-sub" id="previewSub">Дорогие гости! Ждём вас на нашем празднике!</div>
+                    <div class="invite-names" id="previewNames">Александр и Екатерина</div>
+
+                    <!-- Календарь -->
+                    <div class="invite-section">
+                        <div class="section-heading">Календарь</div>
+                        <div id="calendarContainer"></div>
+                        <div class="invite-date" id="previewDate">15 июня 2025</div>
+                    </div>
+
+                    <!-- Тайминг -->
+                    <div class="invite-section">
+                        <div class="section-heading">Тайминг</div>
+                        <ul class="timing-list" id="previewTiming">
+                            <!-- Заполняется JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Место -->
+                    <div class="invite-section">
+                        <div class="section-heading">Место</div>
+                        <div class="invite-place" id="previewPlace">Ресторан «Ласточка»</div>
+                        <div class="location-block">
+                            <div id="previewAddress">г. Москва, ул. Примерная, д. 1</div>
+                            <div class="map-placeholder" id="previewMap">Карта (если указана ссылка)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ПРОСМОТРА (для гостей) -->
+    <div id="viewPage">
+        <div class="view-container" id="viewContainer">
+            <!-- Приглашение будет вставлено здесь -->
+        </div>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО ПУБЛИКАЦИИ -->
+    <div class="publish-modal" id="publishModal">
+        <div class="publish-modal-content">
+            <h3>Ваше приглашение опубликовано!</h3>
+            <p style="margin-bottom:20px;">Скопируйте ссылку и отправьте гостям:</p>
+            <input type="text" class="publish-link" id="publishLink" readonly>
+            <button class="copy-btn" onclick="copyPublishLink()">📋 Копировать</button>
+            <button class="btn btn-outline" onclick="closePublishModal()" style="margin-left:10px;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
+    <footer id="contacts">
+        <div class="footer-logo">Пригласи<span style="color:#ff6b6b;">.</span>ру</div>
+        <p>Контакты: info@priglasi.ru | +7 (900) 000-00-00</p>
+        <p>© 2025 Пригласи.ру — все права защищены</p>
+    </footer>
+
+    <script>
+        // ===== ДАННЫЕ ШАБЛОНОВ =====
+        const templates = [
+            {
+                id: 'elegant',
+                name: 'Элегант',
+                description: 'Классический стиль с золотыми акцентами',
+                miniClass: 'mini-elegant',
+                fullClass: 'tpl-elegant',
+                miniTitle: 'Свадьба',
+                miniNames: 'Александр & Екатерина',
+                miniDate: '15.06.2025'
+            },
+            {
+                id: 'watercolor',
+                name: 'Акварель',
+                description: 'Нежный акварельный фон для романтичных событий',
+                miniClass: 'mini-watercolor',
+                fullClass: 'tpl-watercolor',
+                miniTitle: 'Приглашение',
+                miniNames: 'Анна и Пётр',
+                miniDate: '20.07.2025'
+            },
+            {
+                id: 'minimal',
+                name: 'Минимализм',
+                description: 'Современный лаконичный дизайн',
+                miniClass: 'mini-minimal',
+                fullClass: 'tpl-minimal',
+                miniTitle: 'Вечер',
+                miniNames: 'Дмитрий и Ольга',
+                miniDate: '01.08.2025'
+            },
+            {
+                id: 'party',
+                name: 'Вечеринка',
+                description: 'Яркий стиль для шумных праздников',
+                miniClass: 'mini-party',
+                fullClass: 'tpl-party',
+                miniTitle: 'Party Time!',
+                miniNames: 'Макс & Co',
+                miniDate: '31.12.2025'
+            },
+            {
+                id: 'rustic',
+                name: 'Рустик',
+                description: 'Тёплый деревенский стиль',
+                miniClass: 'mini-rustic',
+                fullClass: 'tpl-rustic',
+                miniTitle: 'Торжество',
+                miniNames: 'Сергей и Мария',
+                miniDate: '05.09.2025'
+            },
+            {
+                id: 'kids',
+                name: 'Детский',
+                description: 'Весёлое оформление для детских праздников',
+                miniClass: 'mini-kids',
+                fullClass: 'tpl-kids',
+                miniTitle: 'День рождения!',
+                miniNames: 'Мишутке 5 лет',
+                miniDate: '10.10.2025'
+            }
+        ];
+
+        // ===== СОСТОЯНИЕ =====
+        let currentTemplate = templates[0];
+        let currentTextColor = '#333333';
+
+        // ===== DOM ЭЛЕМЕНТЫ =====
+        const homePage = document.getElementById('homePage');
+        const editorPage = document.getElementById('editorPage');
+        const viewPage = document.getElementById('viewPage');
+        const templatesGrid = document.getElementById('templatesGrid');
+        const invitationPreview = document.getElementById('invitationPreview');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewSub = document.getElementById('previewSub');
+        const previewNames = document.getElementById('previewNames');
+        const previewDate = document.getElementById('previewDate');
+        const previewPlace = document.getElementById('previewPlace');
+        const previewTiming = document.getElementById('previewTiming');
+        const previewAddress = document.getElementById('previewAddress');
+        const previewMap = document.getElementById('previewMap');
+        const calendarContainer = document.getElementById('calendarContainer');
+
+        const inviteTitle = document.getElementById('inviteTitle');
+        const inviteSub = document.getElementById('inviteSub');
+        const inviteNames = document.getElementById('inviteNames');
+        const inviteDate = document.getElementById('inviteDate');
+        const invitePlace = document.getElementById('invitePlace');
+        const calDay = document.getElementById('calDay');
+        const calMonthSelect = document.getElementById('calMonthSelect');
+        const calYear = document.getElementById('calYear');
+        const timingText = document.getElementById('timingText');
+        const locationAddress = document.getElementById('locationAddress');
+        const locationMap = document.getElementById('locationMap');
+
+        const colorPalette = document.getElementById('colorPalette');
+        const fontSelect = document.getElementById('fontSelect');
+        const orderForm = document.getElementById('orderForm');
+        const orderBtn = document.getElementById('orderBtn');
+        const printBtn = document.getElementById('printBtn');
+        const publishBtn = document.getElementById('publishBtn');
+        const submitOrder = document.getElementById('submitOrder');
+        const previewContainer = document.getElementById('previewContainer');
+
+        const publishModal = document.getElementById('publishModal');
+        const publishLink = document.getElementById('publishLink');
+        const viewContainer = document.getElementById('viewContainer');
+
+        // ===== НАВИГАЦИЯ =====
+        function goHome() {
+            homePage.style.display = 'block';
+            editorPage.classList.remove('active');
+            viewPage.classList.remove('active');
+            window.location.hash = '';
+        }
+
+        function openEditor(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            if (!template) return;
+            currentTemplate = template;
+            homePage.style.display = 'none';
+            editorPage.classList.add('active');
+            viewPage.classList.remove('active');
+            invitationPreview.className = `invitation-card ${template.fullClass}`;
+            updatePreview();
+            window.location.hash = `#/template/${template.id}`;
+            window.scrollTo(0, 0);
+            orderForm.classList.remove('active');
+            orderBtn.textContent = '📩 Заказать';
+        }
+
+        function scrollToTemplates() {
+            document.getElementById('templatesSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ===== ГЕНЕРАЦИЯ КАРТОЧЕК =====
+        function renderTemplates() {
+            templatesGrid.innerHTML = '';
+            templates.forEach(tpl => {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+                card.innerHTML = `
+                    <div class="template-preview">
+                        <div class="mini-invite ${tpl.miniClass}">
+                            <div class="mini-title">${tpl.miniTitle}</div>
+                            <div class="mini-sub">${tpl.description.split('.')[0]}</div>
+                            <div class="mini-names">${tpl.miniNames}</div>
+                            <div class="mini-date">${tpl.miniDate}</div>
+                        </div>
+                    </div>
+                    <div class="template-info">
+                        <h3>${tpl.name}</h3>
+                        <p>${tpl.description}</p>
+                        <button class="btn btn-outline select-tpl" data-id="${tpl.id}">Выбрать</button>
+                    </div>
+                `;
+                templatesGrid.appendChild(card);
+            });
+            document.querySelectorAll('.select-tpl').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditor(btn.dataset.id);
+                });
+            });
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.select-tpl')) return;
+                    const btn = card.querySelector('.select-tpl');
+                    if (btn) btn.click();
+                });
+            });
+        }
+
+        // ===== ФУНКЦИЯ КОНТРАСТА =====
+        function getContrastYIQ(hex) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substr(0,2),16);
+            const g = parseInt(hex.substr(2,2),16);
+            const b = parseInt(hex.substr(4,2),16);
+            const yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? '#000000' : '#ffffff';
+        }
+
+        // ===== РЕНДЕР КАЛЕНДАРЯ =====
+        function renderCalendar(year, month, day, targetContainer = calendarContainer) {
+            const firstDay = new Date(year, month, 1).getDay();
+            const offset = (firstDay + 6) % 7;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const monthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month];
+
+            let html = `<div class="calendar-month-title">${monthName} ${year}</div>`;
+            html += '<table class="calendar-table"><thead><tr>';
+            ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(d => html += `<th>${d}</th>`);
+            html += '</tr></thead><tbody><tr>';
+
+            for (let i = 0; i < offset; i++) {
+                html += '<td></td>';
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const isSelected = d === day;
+                const bgColor = isSelected ? currentTextColor : 'transparent';
+                const textColor = isSelected ? getContrastYIQ(currentTextColor) : 'inherit';
+                html += `<td class="${isSelected ? 'selected' : ''}" style="background:${bgColor}; color:${textColor}; ${isSelected ? 'border-radius: 50%;' : ''}">${d}</td>`;
+                if ((offset + d) % 7 === 0) {
+                    html += '</tr><tr>';
+                }
+            }
+
+            html += '</tr></tbody></table>';
+            targetContainer.innerHTML = html;
+        }
+
+        // ===== ОБНОВЛЕНИЕ ПРЕДПРОСМОТРА =====
+        function updatePreview() {
+            previewTitle.textContent = inviteTitle.value || 'Заголовок';
+            previewSub.textContent = inviteSub.value || '';
+            previewNames.textContent = inviteNames.value || 'Имена';
+            previewPlace.textContent = invitePlace.value || 'Место';
+
+            const month = parseInt(calMonthSelect.value);
+            const year = parseInt(calYear.value) || new Date().getFullYear();
+            const day = parseInt(calDay.value) || 1;
+            renderCalendar(year, month, day);
+
+            const monthName = calMonthSelect.options[calMonthSelect.selectedIndex].text;
+            previewDate.textContent = `${day} ${monthName} ${year}`;
+
+            const timingLines = timingText.value.split('\n').filter(line => line.trim() !== '');
+            previewTiming.innerHTML = '';
+            timingLines.forEach(line => {
+                const li = document.createElement('li');
+                const parts = line.split('–').map(s => s.trim());
+                if (parts.length >= 2) {
+                    li.innerHTML = `<span class="timing-time">${parts[0]}</span> ${parts.slice(1).join('–')}`;
+                } else {
+                    li.textContent = line;
+                }
+                previewTiming.appendChild(li);
+            });
+
+            previewAddress.textContent = locationAddress.value || 'Адрес не указан';
+            const manualMap = locationMap.value.trim();
+            if (manualMap !== '') {
+                previewMap.innerHTML = manualMap;
+                previewMap.classList.remove('map-placeholder');
+                previewMap.style.background = 'none';
+                previewMap.style.height = 'auto';
+            } else if (locationAddress.value.trim() !== '') {
+                const address = encodeURIComponent(locationAddress.value.trim());
+                const src = `https://yandex.ru/map-widget/v1/?text=${address}`;
+                previewMap.innerHTML = `<iframe src="${src}" width="100%" height="200" frameborder="0" style="border:0; border-radius:8px;" allowfullscreen></iframe>`;
+                previewMap.classList.remove('map-placeholder');
+                previewMap.style.background = 'none';
+                previewMap.style.height = 'auto';
+            } else {
+                previewMap.textContent = 'Карта (если указана ссылка)';
+                previewMap.className = 'map-placeholder';
+                previewMap.style.background = '#e0e0e0';
+                previewMap.style.height = '150px';
+            }
+
+            invitationPreview.style.color = currentTextColor;
+            invitationPreview.style.fontFamily = fontSelect.value;
+        }
+
+        // ===== ЦВЕТ =====
+        function setTextColor(color) {
+            currentTextColor = color;
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.color === color);
+            });
+            invitationPreview.style.color = color;
+            updatePreview();
+        }
+
+        // ===== ОБРАБОТЧИКИ =====
+        [inviteTitle, inviteSub, inviteNames, inviteDate, invitePlace, calDay, calMonthSelect, calYear, timingText, locationAddress, locationMap].forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+        calMonthSelect.addEventListener('change', updatePreview);
+        calYear.addEventListener('change', updatePreview);
+        calDay.addEventListener('change', updatePreview);
+
+        colorPalette.addEventListener('click', (e) => {
+            const option = e.target.closest('.color-option');
+            if (option) setTextColor(option.dataset.color);
+        });
+        fontSelect.addEventListener('change', updatePreview);
+
+        // ===== КНОПКА "ЗАКАЗАТЬ" =====
+        orderBtn.addEventListener('click', () => {
+            if (orderForm.classList.contains('active')) {
+                orderForm.classList.remove('active');
+                orderBtn.textContent = '📩 Заказать';
+            } else {
+                orderForm.classList.add('active');
+                orderBtn.textContent = 'Скрыть форму';
+                orderForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // ===== ПЕЧАТЬ =====
+        printBtn.addEventListener('click', () => {
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            const cardHTML = invitationPreview.outerHTML;
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Печать приглашения</title>
+                        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600&family=Caveat:wght@400;700&family=Pacifico&family=Roboto+Slab:wght@300;400;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+                        <style>
+                            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f5f5f5; }
+                            ${document.querySelector('style').innerHTML}
+                            .invitation-card { width: 600px; min-height: auto; }
+                        </style>
+                    </head>
+                    <body>
+                        ${cardHTML}
+                        <script>
+                            window.onload = function() { window.print(); }
+                        <\/script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        });
+
+        // ===== ПУБЛИКАЦИЯ =====
+        function serializeInvitation() {
+            return {
+                templateId: currentTemplate.id,
+                title: inviteTitle.value,
+                sub: inviteSub.value,
+                names: inviteNames.value,
+                date: inviteDate.value,
+                day: calDay.value,
+                month: calMonthSelect.value,
+                year: calYear.value,
+                place: invitePlace.value,
+                address: locationAddress.value,
+                map: locationMap.value,
+                timing: timingText.value,
+                color: currentTextColor,
+                font: fontSelect.value
+            };
+        }
+
+        function applyInvitationData(data) {
+            currentTemplate = templates.find(t => t.id === data.templateId) || templates[0];
+            inviteTitle.value = data.title;
+            inviteSub.value = data.sub;
+            inviteNames.value = data.names;
+            inviteDate.value = data.date;
+            calDay.value = data.day;
+            calMonthSelect.value = data.month;
+            calYear.value = data.year;
+            invitePlace.value = data.place;
+            locationAddress.value = data.address;
+            locationMap.value = data.map;
+            timingText.value = data.timing;
+            setTextColor(data.color);
+            fontSelect.value = data.font;
+            invitationPreview.className = `invitation-card ${currentTemplate.fullClass}`;
+            updatePreview();
+        }
+
+        function encodeInvitation(obj) {
+            const json = JSON.stringify(obj);
+            return btoa(unescape(encodeURIComponent(json)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        function decodeInvitation(base64url) {
+            let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            const json = decodeURIComponent(escape(atob(base64)));
+            return JSON.parse(json);
+        }
+
+        function generatePublishLink() {
+            const data = serializeInvitation();
+            const encoded = encodeInvitation(data);
+            const url = window.location.origin + window.location.pathname + '#/view/' + encoded;
+            return url;
+        }
+
+        publishBtn.addEventListener('click', () => {
+            const link = generatePublishLink();
+            publishLink.value = link;
+            publishModal.classList.add('active');
+        });
+
+        function closePublishModal() {
+            publishModal.classList.remove('active');
+        }
+
+        function copyPublishLink() {
+            publishLink.select();
+            document.execCommand('copy');
+            alert('Ссылка скопирована!');
+        }
+
+        // ===== РЕЖИМ ПРОСМОТРА =====
+        function showViewMode(encodedData) {
+            try {
+                const data = decodeInvitation(encodedData);
+                applyInvitationData(data);
+                // Переключаем видимость
+                homePage.style.display = 'none';
+                editorPage.classList.remove('active');
+                viewPage.classList.add('active');
+                // Заполняем viewContainer
+                const clone = invitationPreview.cloneNode(true);
+                clone.id = 'viewInvitation';
+                viewContainer.innerHTML = '';
+                viewContainer.appendChild(clone);
+                // Прокрутка наверх
+                window.scrollTo(0, 0);
+            } catch (e) {
+                alert('Ошибка загрузки приглашения. Возможно, ссылка повреждена.');
+                goHome();
+            }
+        }
+
+        // ===== ОБРАБОТКА HASH =====
+        function handleHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/template/')) {
+                const id = hash.replace('#/template/', '');
+                const template = templates.find(t => t.id === id);
+                if (template) {
+                    currentTemplate = template;
+                    homePage.style.display = 'none';
+                    editorPage.classList.add('active');
+                    viewPage.classList.remove('active');
+                    invitationPreview.className = `invitation-card ${template.fullClass}`;
+                    updatePreview();
+                    window.scrollTo(0, 0);
+                    orderForm.classList.remove('active');
+                    orderBtn.textContent = '📩 Заказать';
+                } else {
+                    goHome();
+                }
+            } else if (hash.startsWith('#/view/')) {
+                const encoded = hash.replace('#/view/', '');
+                showViewMode(encoded);
+            } else {
+                goHome();
+            }
+        }
+        window.addEventListener('hashchange', handleHash);
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        renderTemplates();
+        invitationPreview.className = `invitation-card ${currentTemplate.fullClass}`;
+        setTextColor('#333333');
+        updatePreview();
+        handleHash();
+
+        // Escape для возврата
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && (editorPage.classList.contains('active') || viewPage.classList.contains('active'))) {
+                goHome();
+            }
+        });
+    </script>
+</body>
+</html>
