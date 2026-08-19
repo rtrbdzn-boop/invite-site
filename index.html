@@ -1084,7 +1084,7 @@
         const wizardPreviewCard = document.getElementById('wizardPreviewCard');
 
         // ===== TELEGRAM BOT CONFIG =====
-        const TG_BOT_TOKEN = '8322467295:AAGxRiX5vaBPDVJtfvX41r1a64u5mO6CsRg'; // НОВЫЙ ТОКЕН
+        const TG_BOT_TOKEN = '8322467295:AAGxRiX5vaBPDVJtfvX41r1a64u5mO6CsRg'; // ТОКЕН
         const TG_CHAT_ID = '628392152';
 
         // ===== НАВИГАЦИЯ =====
@@ -1772,16 +1772,14 @@
             const text = `📩 Новая заявка с сайта Пригласи.ру\n\n👤 Имя: ${name}\n📞 Контакт: ${contact}\n💬 Сообщение: ${message}`;
             const url = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
 
-            // Используем Image для обхода CORS
-            const img = new Image();
-            img.onload = function() {
-                alert('Спасибо! Ваше сообщение отправлено.');
-                document.getElementById('feedbackForm').reset();
-            };
-            img.onerror = function() {
-                alert('Сообщение не отправлено. Проверьте токен и chat_id, а также напишите боту /start.');
-            };
-            img.src = url;
+            fetch(url, { mode: 'no-cors' })
+                .then(() => {
+                    alert('Спасибо! Ваше сообщение отправлено.');
+                    document.getElementById('feedbackForm').reset();
+                })
+                .catch(() => {
+                    alert('Ошибка отправки. Попробуйте позже.');
+                });
         });
 
         // ===== ИНИЦИАЛИЗАЦИЯ =====
