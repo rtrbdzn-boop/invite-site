@@ -471,6 +471,65 @@
             min-width: 120px;
         }
 
+        /* ===== СТРАНИЦА КОНТАКТОВ ===== */
+        #contactsPage {
+            display: none;
+            padding: 60px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #contactsPage.active {
+            display: block;
+        }
+        .contacts-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .contacts-info {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+        .contacts-info h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+        .contacts-info p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .contacts-info a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .contact-form {
+            background: white;
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+        }
+        .contact-form h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .contact-form button {
+            width: 100%;
+        }
+
         /* ===== РЕЖИМ ПРОСМОТРА ===== */
         #viewPage {
             display: none;
@@ -566,6 +625,13 @@
         }
         footer p { font-size: 14px; }
 
+        /* Стиль таймера */
+        .countdown {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
         /* Адаптивность */
         @media (max-width: 600px) {
             .header-inner { flex-direction: column; gap: 10px; }
@@ -584,7 +650,7 @@
             <nav>
                 <a href="#" onclick="goHome()">Главная</a>
                 <a href="#" onclick="scrollToTemplates()">Шаблоны</a>
-                <a href="#">Контакты</a>
+                <a href="#" onclick="goToContacts()">Контакты</a>
             </nav>
             <a href="#" class="btn" onclick="startCustomWizard()">Создать приглашение</a>
         </div>
@@ -604,6 +670,27 @@
                 <!-- Заполняется JS -->
             </div>
         </section>
+    </div>
+
+    <!-- СТРАНИЦА КОНТАКТОВ -->
+    <div id="contactsPage">
+        <h2 class="contacts-title">Контакты</h2>
+        <div class="contacts-info">
+            <h3>Наши контакты</h3>
+            <p><strong>Телефон:</strong> <a href="tel:89101627867">89101627867</a></p>
+            <p><strong>Email:</strong> <a href="mailto:info@priglasi.ru">info@priglasi.ru</a></p>
+            <p><strong>Адрес:</strong> г. Москва, ул. Примерная, д. 1</p>
+            <p><strong>Режим работы:</strong> ежедневно с 9:00 до 21:00</p>
+        </div>
+        <div class="contact-form">
+            <h3>Обратная связь</h3>
+            <form id="feedbackForm">
+                <input type="text" id="feedbackName" placeholder="Ваше имя" required>
+                <input type="text" id="feedbackContact" placeholder="Телефон или Email" required>
+                <textarea id="feedbackMessage" rows="5" placeholder="Сообщение" required></textarea>
+                <button type="submit" class="btn">Отправить</button>
+            </form>
+        </div>
     </div>
 
     <!-- СТРАНИЦА РЕДАКТОРА -->
@@ -711,6 +798,12 @@
                         <div class="section-heading">Календарь</div>
                         <div id="calendarContainer"></div>
                         <div class="invite-date" id="previewDate">15 июня 2025</div>
+                    </div>
+
+                    <!-- Таймер обратного отсчета -->
+                    <div class="invite-section" id="countdownSection" style="display:none;">
+                        <div class="section-heading">До события осталось</div>
+                        <div class="countdown" id="countdownTimer">-- дней</div>
                     </div>
 
                     <!-- Тайминг -->
@@ -945,6 +1038,7 @@
         const homePage = document.getElementById('homePage');
         const editorPage = document.getElementById('editorPage');
         const viewPage = document.getElementById('viewPage');
+        const contactsPage = document.getElementById('contactsPage');
         const templatesGrid = document.getElementById('templatesGrid');
         const invitationPreview = document.getElementById('invitationPreview');
         const previewTitle = document.getElementById('previewTitle');
@@ -957,6 +1051,8 @@
         const previewMap = document.getElementById('previewMap');
         const calendarContainer = document.getElementById('calendarContainer');
         const calendarSection = document.getElementById('calendarSection');
+        const countdownSection = document.getElementById('countdownSection');
+        const countdownTimer = document.getElementById('countdownTimer');
         const timingSection = document.getElementById('timingSection');
         const locationSection = document.getElementById('locationSection');
 
@@ -987,21 +1083,37 @@
         const wizardModal = document.getElementById('wizardModal');
         const wizardPreviewCard = document.getElementById('wizardPreviewCard');
 
+        // ===== TELEGRAM BOT CONFIG =====
+        const TG_BOT_TOKEN = '8815477767:AAFa8pbayQNDYBcb3xOc167t-msDHvjWlHM';
+        const TG_CHAT_ID = '628392152';
+
         // ===== НАВИГАЦИЯ =====
-        function goHome() {
-            homePage.style.display = 'block';
+        function hideAllPages() {
+            homePage.style.display = 'none';
             editorPage.classList.remove('active');
             viewPage.classList.remove('active');
+            contactsPage.classList.remove('active');
+        }
+
+        function goHome() {
+            hideAllPages();
+            homePage.style.display = 'block';
             window.location.hash = '';
+        }
+
+        function goToContacts() {
+            hideAllPages();
+            contactsPage.classList.add('active');
+            window.location.hash = '#/contacts';
+            window.scrollTo(0, 0);
         }
 
         function openEditor(templateId) {
             const template = templates.find(t => t.id === templateId);
             if (!template) return;
             currentTemplate = template;
-            homePage.style.display = 'none';
+            hideAllPages();
             editorPage.classList.add('active');
-            viewPage.classList.remove('active');
             invitationPreview.className = `invitation-card ${template.fullClass}`;
             if (templateId !== 'custom') {
                 customSettings = { borderColor: null, borderWidth: null, borderStyle: null, fontFamily: null, textColor: null };
@@ -1095,6 +1207,17 @@
             targetContainer.innerHTML = html;
         }
 
+        // ===== РАСЧЕТ ДНЕЙ ДО СОБЫТИЯ =====
+        function getDaysLeft(year, month, day) {
+            const now = new Date();
+            now.setHours(0,0,0,0);
+            const eventDate = new Date(year, month, day);
+            eventDate.setHours(0,0,0,0);
+            const diffTime = eventDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
         // ===== ОБНОВЛЕНИЕ ПРЕДПРОСМОТРА (редактор) =====
         function updatePreview() {
             previewTitle.textContent = inviteTitle.value || 'Заголовок';
@@ -1111,8 +1234,19 @@
                 renderCalendar(year, month, day, calendarContainer, currentTextColor);
                 const monthName = calMonthSelect.options[calMonthSelect.selectedIndex].text;
                 previewDate.textContent = `${day} ${monthName} ${year}`;
+                // Таймер
+                const daysLeft = getDaysLeft(year, month, day);
+                countdownSection.style.display = 'block';
+                if (daysLeft > 0) {
+                    countdownTimer.textContent = `${daysLeft} дн.`;
+                } else if (daysLeft === 0) {
+                    countdownTimer.textContent = 'Сегодня!';
+                } else {
+                    countdownTimer.textContent = 'Событие прошло';
+                }
             } else {
                 calendarSection.style.display = 'none';
+                countdownSection.style.display = 'none';
             }
 
             const timingLines = timingText.value.split('\n').filter(line => line.trim() !== '');
@@ -1481,6 +1615,20 @@
                 calendarSectionDiv.appendChild(dateStr);
 
                 wizardPreviewCard.appendChild(calendarSectionDiv);
+
+                // Таймер в мастере
+                const countdownDiv = document.createElement('div');
+                countdownDiv.className = 'invite-section';
+                const countdownHeading = document.createElement('div');
+                countdownHeading.className = 'section-heading';
+                countdownHeading.textContent = 'До события осталось';
+                countdownDiv.appendChild(countdownHeading);
+                const countdownValue = document.createElement('div');
+                countdownValue.className = 'countdown';
+                const daysLeft = getDaysLeft(yearInt, monthInt, dayInt);
+                countdownValue.textContent = daysLeft > 0 ? `${daysLeft} дн.` : (daysLeft === 0 ? 'Сегодня!' : 'Событие прошло');
+                countdownDiv.appendChild(countdownValue);
+                wizardPreviewCard.appendChild(countdownDiv);
             }
 
             const place = document.getElementById('wizardPlace').value.trim();
@@ -1574,8 +1722,7 @@
             try {
                 const data = decodeInvitation(encodedData);
                 applyInvitationData(data);
-                homePage.style.display = 'none';
-                editorPage.classList.remove('active');
+                hideAllPages();
                 viewPage.classList.add('active');
                 const clone = invitationPreview.cloneNode(true);
                 clone.id = 'viewInvitation';
@@ -1602,11 +1749,35 @@
             } else if (hash.startsWith('#/view/')) {
                 const encoded = hash.replace('#/view/', '');
                 showViewMode(encoded);
+            } else if (hash === '#/contacts') {
+                goToContacts();
             } else {
                 goHome();
             }
         }
         window.addEventListener('hashchange', handleHash);
+
+        // ===== ОТПРАВКА ФОРМЫ ОБРАТНОЙ СВЯЗИ В TELEGRAM =====
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('feedbackName').value.trim();
+            const contact = document.getElementById('feedbackContact').value.trim();
+            const message = document.getElementById('feedbackMessage').value.trim();
+
+            if (!name || !contact || !message) {
+                alert('Заполните все поля');
+                return;
+            }
+
+            const text = `📩 Новая заявка с сайта Пригласи.ру\n\n👤 Имя: ${name}\n📞 Контакт: ${contact}\n💬 Сообщение: ${message}`;
+            const url = `https://api.telegram.org/bot${TG_BOT_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`;
+
+            // Отправляем через изображение (обходим CORS)
+            new Image().src = url;
+
+            alert('Спасибо! Ваше сообщение отправлено.');
+            document.getElementById('feedbackForm').reset();
+        });
 
         // ===== ИНИЦИАЛИЗАЦИЯ =====
         renderTemplates();
@@ -1620,7 +1791,7 @@
             if (e.key === 'Escape') {
                 if (wizardModal.classList.contains('active')) {
                     closeWizard();
-                } else if (editorPage.classList.contains('active') || viewPage.classList.contains('active')) {
+                } else if (editorPage.classList.contains('active') || viewPage.classList.contains('active') || contactsPage.classList.contains('active')) {
                     goHome();
                 }
             }
