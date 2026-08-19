@@ -337,6 +337,14 @@
         .tpl-kids .invite-names { font-size: 28px; }
         .tpl-kids .section-heading { color: #ff9800; }
 
+        /* Кастомный шаблон (созданный пользователем) */
+        .tpl-custom {
+            background: #ffffff;
+            border: 3px solid #333;
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+        }
+
         /* Кнопки действий */
         .modal-actions {
             display: flex;
@@ -356,6 +364,112 @@
         }
         .order-form.active { display: block; }
         .order-form h3 { margin-bottom: 20px; font-family: 'Playfair Display', serif; }
+
+        /* ===== МАСТЕР СОЗДАНИЯ ШАБЛОНА ===== */
+        .wizard-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .wizard-modal.active {
+            display: flex;
+        }
+        .wizard-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            position: relative;
+        }
+        @media (max-width: 800px) {
+            .wizard-content { grid-template-columns: 1fr; }
+        }
+        .wizard-left {
+            min-width: 0;
+        }
+        .wizard-right {
+            min-width: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .wizard-preview-card {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .wizard-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+            z-index: 10;
+        }
+        .wizard-step {
+            display: none;
+        }
+        .wizard-step.active {
+            display: block;
+        }
+        .wizard-step h3 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+        .wizard-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .wizard-option {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .wizard-option:hover, .wizard-option.selected {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+        .wizard-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+        .wizard-buttons .btn {
+            min-width: 120px;
+        }
 
         /* ===== РЕЖИМ ПРОСМОТРА ===== */
         #viewPage {
@@ -472,7 +586,7 @@
                 <a href="#" onclick="scrollToTemplates()">Шаблоны</a>
                 <a href="#">Контакты</a>
             </nav>
-            <a href="#" class="btn" onclick="scrollToTemplates()">Создать приглашение</a>
+            <a href="#" class="btn" onclick="startCustomWizard()">Создать приглашение</a>
         </div>
     </header>
 
@@ -480,12 +594,12 @@
     <div id="homePage">
         <section class="hero">
             <h1>Электронные пригласительные<br>для вашего события</h1>
-            <p>Выберите шаблон, добавьте календарь, тайминг, место и отправьте гостям за пару минут.</p>
-            <a href="#" class="btn" onclick="scrollToTemplates()">Выбрать шаблон</a>
+            <p>Выберите готовый шаблон или создайте свой за несколько шагов.</p>
+            <a href="#" class="btn" onclick="startCustomWizard()">Создать свой шаблон</a>
         </section>
 
         <section id="templatesSection" class="container">
-            <h2 class="section-title">Наши шаблоны</h2>
+            <h2 class="section-title">Готовые шаблоны</h2>
             <div class="templates-grid" id="templatesGrid">
                 <!-- Заполняется JS -->
             </div>
@@ -534,9 +648,6 @@
 
                 <label>Адрес (полностью)</label>
                 <input type="text" id="locationAddress" value="г. Москва, ул. Примерная, д. 1">
-
-                <label>Ссылка на карту (embed)</label>
-                <input type="text" id="locationMap" placeholder="Вставьте iframe или ссылку" value="">
 
                 <label>Тайминг (каждая строка: время – событие)</label>
                 <textarea id="timingText" rows="6">15:00 – Сбор гостей
@@ -596,14 +707,14 @@
                     <div class="invite-names" id="previewNames">Александр и Екатерина</div>
 
                     <!-- Календарь -->
-                    <div class="invite-section">
+                    <div class="invite-section" id="calendarSection">
                         <div class="section-heading">Календарь</div>
                         <div id="calendarContainer"></div>
                         <div class="invite-date" id="previewDate">15 июня 2025</div>
                     </div>
 
                     <!-- Тайминг -->
-                    <div class="invite-section">
+                    <div class="invite-section" id="timingSection">
                         <div class="section-heading">Тайминг</div>
                         <ul class="timing-list" id="previewTiming">
                             <!-- Заполняется JS -->
@@ -611,7 +722,7 @@
                     </div>
 
                     <!-- Место -->
-                    <div class="invite-section">
+                    <div class="invite-section" id="locationSection">
                         <div class="section-heading">Место</div>
                         <div class="invite-place" id="previewPlace">Ресторан «Ласточка»</div>
                         <div class="location-block">
@@ -642,15 +753,120 @@
         </div>
     </div>
 
+    <!-- МОДАЛЬНОЕ ОКНО МАСТЕРА -->
+    <div class="wizard-modal" id="wizardModal">
+        <div class="wizard-content">
+            <button class="wizard-close" onclick="closeWizard()">&times;</button>
+            <!-- Левая часть: шаги -->
+            <div class="wizard-left">
+                <!-- Шаг 1: Рамка -->
+                <div class="wizard-step active" id="wizardStep1">
+                    <h3>Выберите цвет рамки</h3>
+                    <div class="wizard-options" id="borderOptions">
+                        <div class="wizard-option" data-border="gold" style="border-color:#c9a84c;">Золотая</div>
+                        <div class="wizard-option" data-border="blue" style="border-color:#3498db;">Синяя</div>
+                        <div class="wizard-option" data-border="red" style="border-color:#e74c3c;">Красная</div>
+                        <div class="wizard-option" data-border="black" style="border-color:#333;">Чёрная</div>
+                        <div class="wizard-option" data-border="none" style="border-color:#ddd;">Без рамки</div>
+                    </div>
+                    <div class="wizard-buttons">
+                        <button class="btn btn-outline" onclick="wizardSkip(1)">Пропустить</button>
+                        <button class="btn" onclick="wizardNext(1)">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Шаг 2: Шрифт -->
+                <div class="wizard-step" id="wizardStep2">
+                    <h3>Выберите шрифт</h3>
+                    <div class="wizard-options" id="fontOptions">
+                        <div class="wizard-option" data-font="'Playfair Display', serif">Playfair Display</div>
+                        <div class="wizard-option" data-font="'Caveat', cursive">Caveat</div>
+                        <div class="wizard-option" data-font="'Montserrat', sans-serif">Montserrat</div>
+                        <div class="wizard-option" data-font="'Pacifico', cursive">Pacifico</div>
+                        <div class="wizard-option" data-font="'Roboto Slab', serif">Roboto Slab</div>
+                        <div class="wizard-option" data-font="'Nunito', sans-serif">Nunito</div>
+                    </div>
+                    <div class="wizard-buttons">
+                        <button class="btn btn-outline" onclick="wizardSkip(2)">Пропустить</button>
+                        <button class="btn" onclick="wizardNext(2)">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Шаг 3: Цвет текста -->
+                <div class="wizard-step" id="wizardStep3">
+                    <h3>Выберите цвет текста</h3>
+                    <div class="wizard-options" id="textColorOptions">
+                        <div class="wizard-option" data-color="#333" style="background:#333; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#c9a84c" style="background:#c9a84c; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#e74c3c" style="background:#e74c3c; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#2ecc71" style="background:#2ecc71; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#3498db" style="background:#3498db; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#9b59b6" style="background:#9b59b6; width:40px; height:40px; border-radius:50%;"></div>
+                        <div class="wizard-option" data-color="#ffffff" style="background:#ffffff; width:40px; height:40px; border-radius:50%; border:1px solid #ddd;"></div>
+                    </div>
+                    <div class="wizard-buttons">
+                        <button class="btn btn-outline" onclick="wizardSkip(3)">Пропустить</button>
+                        <button class="btn" onclick="wizardNext(3)">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Шаг 4: Дата -->
+                <div class="wizard-step" id="wizardStep4">
+                    <h3>Укажите дату (необязательно)</h3>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <input type="number" id="wizardDay" placeholder="День" min="1" max="31" style="flex:1;">
+                        <select id="wizardMonth" style="flex:2;">
+                            <option value="">Месяц</option>
+                            <option value="0">Январь</option>
+                            <option value="1">Февраль</option>
+                            <option value="2">Март</option>
+                            <option value="3">Апрель</option>
+                            <option value="4">Май</option>
+                            <option value="5">Июнь</option>
+                            <option value="6">Июль</option>
+                            <option value="7">Август</option>
+                            <option value="8">Сентябрь</option>
+                            <option value="9">Октябрь</option>
+                            <option value="10">Ноябрь</option>
+                            <option value="11">Декабрь</option>
+                        </select>
+                        <input type="number" id="wizardYear" placeholder="Год" min="2020" max="2030" style="flex:1;">
+                    </div>
+                    <div class="wizard-buttons">
+                        <button class="btn btn-outline" onclick="wizardSkip(4)">Пропустить</button>
+                        <button class="btn" onclick="wizardNext(4)">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Шаг 5: Место -->
+                <div class="wizard-step" id="wizardStep5">
+                    <h3>Укажите место (необязательно)</h3>
+                    <input type="text" id="wizardPlace" placeholder="Название (например, Ресторан «Ласточка»)" style="margin-bottom:10px;">
+                    <input type="text" id="wizardAddress" placeholder="Адрес (например, г. Москва, ул. Примерная, д. 1)" style="margin-bottom:20px;">
+                    <div class="wizard-buttons">
+                        <button class="btn btn-outline" onclick="wizardSkip(5)">Пропустить</button>
+                        <button class="btn" onclick="wizardFinish()">Завершить</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Правая часть: предпросмотр -->
+            <div class="wizard-right">
+                <div class="wizard-preview-card" id="wizardPreviewCard">
+                    <!-- Динамически обновляется через JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ФУТЕР -->
     <footer id="contacts">
         <div class="footer-logo">Пригласи<span style="color:#ff6b6b;">.</span>ру</div>
-        <p>Контакты: info@priglasi.ru | +7 (900) 000-00-00</p>
+        <p>Контакты: info@priglasi.ru | <a href="tel:89101627867" style="color:#aaa;">89101627867</a></p>
         <p>© 2025 Пригласи.ру — все права защищены</p>
     </footer>
 
     <script>
-        // ===== ДАННЫЕ ШАБЛОНОВ =====
+        // ===== ДАННЫЕ ШАБЛОНОВ (без кастомного) =====
         const templates = [
             {
                 id: 'elegant',
@@ -717,6 +933,13 @@
         // ===== СОСТОЯНИЕ =====
         let currentTemplate = templates[0];
         let currentTextColor = '#333333';
+        let customSettings = {
+            borderColor: null,
+            borderWidth: null,
+            borderStyle: null,
+            fontFamily: null,
+            textColor: null
+        };
 
         // ===== DOM ЭЛЕМЕНТЫ =====
         const homePage = document.getElementById('homePage');
@@ -733,6 +956,9 @@
         const previewAddress = document.getElementById('previewAddress');
         const previewMap = document.getElementById('previewMap');
         const calendarContainer = document.getElementById('calendarContainer');
+        const calendarSection = document.getElementById('calendarSection');
+        const timingSection = document.getElementById('timingSection');
+        const locationSection = document.getElementById('locationSection');
 
         const inviteTitle = document.getElementById('inviteTitle');
         const inviteSub = document.getElementById('inviteSub');
@@ -744,7 +970,6 @@
         const calYear = document.getElementById('calYear');
         const timingText = document.getElementById('timingText');
         const locationAddress = document.getElementById('locationAddress');
-        const locationMap = document.getElementById('locationMap');
 
         const colorPalette = document.getElementById('colorPalette');
         const fontSelect = document.getElementById('fontSelect');
@@ -758,6 +983,9 @@
         const publishModal = document.getElementById('publishModal');
         const publishLink = document.getElementById('publishLink');
         const viewContainer = document.getElementById('viewContainer');
+
+        const wizardModal = document.getElementById('wizardModal');
+        const wizardPreviewCard = document.getElementById('wizardPreviewCard');
 
         // ===== НАВИГАЦИЯ =====
         function goHome() {
@@ -775,6 +1003,9 @@
             editorPage.classList.add('active');
             viewPage.classList.remove('active');
             invitationPreview.className = `invitation-card ${template.fullClass}`;
+            if (templateId !== 'custom') {
+                customSettings = { borderColor: null, borderWidth: null, borderStyle: null, fontFamily: null, textColor: null };
+            }
             updatePreview();
             window.location.hash = `#/template/${template.id}`;
             window.scrollTo(0, 0);
@@ -835,7 +1066,7 @@
         }
 
         // ===== РЕНДЕР КАЛЕНДАРЯ =====
-        function renderCalendar(year, month, day, targetContainer = calendarContainer) {
+        function renderCalendar(year, month, day, targetContainer = calendarContainer, textColor = currentTextColor) {
             const firstDay = new Date(year, month, 1).getDay();
             const offset = (firstDay + 6) % 7;
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -852,9 +1083,9 @@
 
             for (let d = 1; d <= daysInMonth; d++) {
                 const isSelected = d === day;
-                const bgColor = isSelected ? currentTextColor : 'transparent';
-                const textColor = isSelected ? getContrastYIQ(currentTextColor) : 'inherit';
-                html += `<td class="${isSelected ? 'selected' : ''}" style="background:${bgColor}; color:${textColor}; ${isSelected ? 'border-radius: 50%;' : ''}">${d}</td>`;
+                const bgColor = isSelected ? textColor : 'transparent';
+                const textColorVal = isSelected ? getContrastYIQ(textColor) : 'inherit';
+                html += `<td class="${isSelected ? 'selected' : ''}" style="background:${bgColor}; color:${textColorVal}; ${isSelected ? 'border-radius: 50%;' : ''}">${d}</td>`;
                 if ((offset + d) % 7 === 0) {
                     html += '</tr><tr>';
                 }
@@ -864,7 +1095,7 @@
             targetContainer.innerHTML = html;
         }
 
-        // ===== ОБНОВЛЕНИЕ ПРЕДПРОСМОТРА =====
+        // ===== ОБНОВЛЕНИЕ ПРЕДПРОСМОТРА (редактор) =====
         function updatePreview() {
             previewTitle.textContent = inviteTitle.value || 'Заголовок';
             previewSub.textContent = inviteSub.value || '';
@@ -873,53 +1104,98 @@
 
             const month = parseInt(calMonthSelect.value);
             const year = parseInt(calYear.value) || new Date().getFullYear();
-            const day = parseInt(calDay.value) || 1;
-            renderCalendar(year, month, day);
+            const day = parseInt(calDay.value) || null;
 
-            const monthName = calMonthSelect.options[calMonthSelect.selectedIndex].text;
-            previewDate.textContent = `${day} ${monthName} ${year}`;
+            if (day && month !== undefined && year) {
+                calendarSection.style.display = 'block';
+                renderCalendar(year, month, day, calendarContainer, currentTextColor);
+                const monthName = calMonthSelect.options[calMonthSelect.selectedIndex].text;
+                previewDate.textContent = `${day} ${monthName} ${year}`;
+            } else {
+                calendarSection.style.display = 'none';
+            }
 
             const timingLines = timingText.value.split('\n').filter(line => line.trim() !== '');
             previewTiming.innerHTML = '';
-            timingLines.forEach(line => {
-                const li = document.createElement('li');
-                const parts = line.split('–').map(s => s.trim());
-                if (parts.length >= 2) {
-                    li.innerHTML = `<span class="timing-time">${parts[0]}</span> ${parts.slice(1).join('–')}`;
-                } else {
-                    li.textContent = line;
-                }
-                previewTiming.appendChild(li);
-            });
-
-            previewAddress.textContent = locationAddress.value || 'Адрес не указан';
-            const manualMap = locationMap.value.trim();
-            if (manualMap !== '') {
-                previewMap.innerHTML = manualMap;
-                previewMap.classList.remove('map-placeholder');
-                previewMap.style.background = 'none';
-                previewMap.style.height = 'auto';
-            } else if (locationAddress.value.trim() !== '') {
-                const address = encodeURIComponent(locationAddress.value.trim());
-                const src = `https://yandex.ru/map-widget/v1/?text=${address}`;
-                previewMap.innerHTML = `<iframe src="${src}" width="100%" height="200" frameborder="0" style="border:0; border-radius:8px;" allowfullscreen></iframe>`;
-                previewMap.classList.remove('map-placeholder');
-                previewMap.style.background = 'none';
-                previewMap.style.height = 'auto';
+            if (timingLines.length > 0) {
+                timingSection.style.display = 'block';
+                timingLines.forEach(line => {
+                    const li = document.createElement('li');
+                    const parts = line.split('–').map(s => s.trim());
+                    if (parts.length >= 2) {
+                        li.innerHTML = `<span class="timing-time">${parts[0]}</span> ${parts.slice(1).join('–')}`;
+                    } else {
+                        li.textContent = line;
+                    }
+                    previewTiming.appendChild(li);
+                });
             } else {
-                previewMap.textContent = 'Карта (если указана ссылка)';
-                previewMap.className = 'map-placeholder';
-                previewMap.style.background = '#e0e0e0';
-                previewMap.style.height = '150px';
+                timingSection.style.display = 'none';
             }
 
-            invitationPreview.style.color = currentTextColor;
-            invitationPreview.style.fontFamily = fontSelect.value;
+            // Место и карта (только адрес)
+            const hasPlace = invitePlace.value.trim() || locationAddress.value.trim();
+            if (hasPlace) {
+                locationSection.style.display = 'block';
+                previewAddress.textContent = locationAddress.value || 'Адрес не указан';
+                const address = locationAddress.value.trim();
+                if (address !== '') {
+                    const encodedAddress = encodeURIComponent(address);
+                    const src = `https://yandex.ru/map-widget/v1/?text=${encodedAddress}&z=16`;
+                    previewMap.innerHTML = `<iframe src="${src}" width="100%" height="200" frameborder="0" style="border:0; border-radius:8px;" allowfullscreen></iframe>`;
+                    previewMap.classList.remove('map-placeholder');
+                    previewMap.style.background = 'none';
+                    previewMap.style.height = 'auto';
+                } else {
+                    previewMap.textContent = 'Карта (укажите адрес)';
+                    previewMap.className = 'map-placeholder';
+                    previewMap.style.background = '#e0e0e0';
+                    previewMap.style.height = '150px';
+                }
+            } else {
+                locationSection.style.display = 'none';
+            }
+
+            if (currentTemplate && currentTemplate.id === 'custom') {
+                if (customSettings.borderColor) {
+                    invitationPreview.style.border = `${customSettings.borderWidth || 3}px ${customSettings.borderStyle || 'solid'} ${customSettings.borderColor}`;
+                } else {
+                    invitationPreview.style.border = 'none';
+                }
+                if (customSettings.fontFamily) {
+                    invitationPreview.style.fontFamily = customSettings.fontFamily;
+                } else {
+                    invitationPreview.style.fontFamily = "'Montserrat', sans-serif";
+                }
+                if (customSettings.textColor) {
+                    invitationPreview.style.color = customSettings.textColor;
+                    currentTextColor = customSettings.textColor;
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.toggle('active', opt.dataset.color === customSettings.textColor);
+                    });
+                } else {
+                    invitationPreview.style.color = '#333333';
+                    currentTextColor = '#333333';
+                }
+                if (day && month !== undefined && year) {
+                    renderCalendar(year, month, day, calendarContainer, currentTextColor);
+                }
+            } else {
+                invitationPreview.style.border = '';
+                invitationPreview.style.fontFamily = '';
+                invitationPreview.style.color = currentTextColor;
+                if (day && month !== undefined && year) {
+                    renderCalendar(year, month, day, calendarContainer, currentTextColor);
+                }
+            }
         }
 
         // ===== ЦВЕТ =====
         function setTextColor(color) {
             currentTextColor = color;
+            if (currentTemplate && currentTemplate.id === 'custom') {
+                customSettings.textColor = color;
+            }
             document.querySelectorAll('.color-option').forEach(opt => {
                 opt.classList.toggle('active', opt.dataset.color === color);
             });
@@ -928,7 +1204,7 @@
         }
 
         // ===== ОБРАБОТЧИКИ =====
-        [inviteTitle, inviteSub, inviteNames, inviteDate, invitePlace, calDay, calMonthSelect, calYear, timingText, locationAddress, locationMap].forEach(input => {
+        [inviteTitle, inviteSub, inviteNames, inviteDate, invitePlace, calDay, calMonthSelect, calYear, timingText, locationAddress].forEach(input => {
             input.addEventListener('input', updatePreview);
         });
         calMonthSelect.addEventListener('change', updatePreview);
@@ -939,7 +1215,12 @@
             const option = e.target.closest('.color-option');
             if (option) setTextColor(option.dataset.color);
         });
-        fontSelect.addEventListener('change', updatePreview);
+        fontSelect.addEventListener('change', (e) => {
+            if (currentTemplate && currentTemplate.id === 'custom') {
+                customSettings.fontFamily = fontSelect.value;
+            }
+            updatePreview();
+        });
 
         // ===== КНОПКА "ЗАКАЗАТЬ" =====
         orderBtn.addEventListener('click', () => {
@@ -992,15 +1273,22 @@
                 year: calYear.value,
                 place: invitePlace.value,
                 address: locationAddress.value,
-                map: locationMap.value,
                 timing: timingText.value,
                 color: currentTextColor,
-                font: fontSelect.value
+                font: fontSelect.value,
+                custom: currentTemplate.id === 'custom' ? {
+                    borderColor: customSettings.borderColor,
+                    borderWidth: customSettings.borderWidth,
+                    borderStyle: customSettings.borderStyle,
+                    fontFamily: customSettings.fontFamily,
+                    textColor: customSettings.textColor
+                } : null
             };
         }
 
         function applyInvitationData(data) {
-            currentTemplate = templates.find(t => t.id === data.templateId) || templates[0];
+            const template = templates.find(t => t.id === data.templateId) || templates[0];
+            currentTemplate = template;
             inviteTitle.value = data.title;
             inviteSub.value = data.sub;
             inviteNames.value = data.names;
@@ -1010,11 +1298,17 @@
             calYear.value = data.year;
             invitePlace.value = data.place;
             locationAddress.value = data.address;
-            locationMap.value = data.map;
             timingText.value = data.timing;
-            setTextColor(data.color);
             fontSelect.value = data.font;
-            invitationPreview.className = `invitation-card ${currentTemplate.fullClass}`;
+            setTextColor(data.color);
+
+            if (data.custom) {
+                customSettings = data.custom;
+                invitationPreview.className = 'invitation-card tpl-custom';
+            } else {
+                customSettings = { borderColor: null, borderWidth: null, borderStyle: null, fontFamily: null, textColor: null };
+                invitationPreview.className = `invitation-card ${template.fullClass}`;
+            }
             updatePreview();
         }
 
@@ -1056,21 +1350,237 @@
             alert('Ссылка скопирована!');
         }
 
+        // ===== МАСТЕР СОЗДАНИЯ ШАБЛОНА =====
+        let wizardSelectedBorder = null;
+        let wizardSelectedFont = null;
+        let wizardSelectedTextColor = null;
+
+        function startCustomWizard() {
+            wizardModal.classList.add('active');
+            goToStep(1);
+            wizardSelectedBorder = null;
+            wizardSelectedFont = null;
+            wizardSelectedTextColor = null;
+            document.querySelectorAll('#borderOptions .wizard-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('#fontOptions .wizard-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('#textColorOptions .wizard-option').forEach(opt => opt.classList.remove('selected'));
+            // Сброс полей даты и места
+            document.getElementById('wizardDay').value = '';
+            document.getElementById('wizardMonth').value = '';
+            document.getElementById('wizardYear').value = '';
+            document.getElementById('wizardPlace').value = '';
+            document.getElementById('wizardAddress').value = '';
+            updateWizardPreview();
+        }
+
+        function closeWizard() {
+            wizardModal.classList.remove('active');
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`wizardStep${step}`).classList.add('active');
+        }
+
+        function wizardNext(currentStep) {
+            goToStep(currentStep + 1);
+            updateWizardPreview();
+        }
+
+        function wizardSkip(currentStep) {
+            wizardNext(currentStep);
+        }
+
+        // Обработчики выбора опций в мастере
+        document.querySelectorAll('#borderOptions .wizard-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('#borderOptions .wizard-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                wizardSelectedBorder = opt.dataset.border;
+                updateWizardPreview();
+            });
+        });
+
+        document.querySelectorAll('#fontOptions .wizard-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('#fontOptions .wizard-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                wizardSelectedFont = opt.dataset.font;
+                updateWizardPreview();
+            });
+        });
+
+        document.querySelectorAll('#textColorOptions .wizard-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('#textColorOptions .wizard-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                wizardSelectedTextColor = opt.dataset.color;
+                updateWizardPreview();
+            });
+        });
+
+        // Обработчики для полей даты и места в мастере
+        ['wizardDay', 'wizardMonth', 'wizardYear', 'wizardPlace', 'wizardAddress'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateWizardPreview);
+        });
+
+        // Функция обновления предпросмотра мастера
+        function updateWizardPreview() {
+            wizardPreviewCard.innerHTML = '';
+
+            if (wizardSelectedBorder && wizardSelectedBorder !== 'none') {
+                const borderColor = mapBorderColor(wizardSelectedBorder);
+                const borderStyle = wizardSelectedBorder === 'gold' ? 'double' : 'solid';
+                wizardPreviewCard.style.border = `3px ${borderStyle} ${borderColor}`;
+            } else {
+                wizardPreviewCard.style.border = 'none';
+            }
+
+            if (wizardSelectedFont) {
+                wizardPreviewCard.style.fontFamily = wizardSelectedFont;
+            } else {
+                wizardPreviewCard.style.fontFamily = "'Montserrat', sans-serif";
+            }
+
+            const textColor = wizardSelectedTextColor || '#333333';
+            wizardPreviewCard.style.color = textColor;
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'invite-title';
+            titleEl.textContent = 'Приглашение';
+            wizardPreviewCard.appendChild(titleEl);
+
+            const namesEl = document.createElement('div');
+            namesEl.className = 'invite-names';
+            namesEl.textContent = '';
+            wizardPreviewCard.appendChild(namesEl);
+
+            const day = document.getElementById('wizardDay').value;
+            const month = document.getElementById('wizardMonth').value;
+            const year = document.getElementById('wizardYear').value;
+            if (day && month !== '' && year) {
+                const calendarSectionDiv = document.createElement('div');
+                calendarSectionDiv.className = 'invite-section';
+
+                const heading = document.createElement('div');
+                heading.className = 'section-heading';
+                heading.textContent = 'Календарь';
+                calendarSectionDiv.appendChild(heading);
+
+                const calendarDiv = document.createElement('div');
+                calendarSectionDiv.appendChild(calendarDiv);
+
+                const monthInt = parseInt(month);
+                const dayInt = parseInt(day);
+                const yearInt = parseInt(year);
+                renderCalendar(yearInt, monthInt, dayInt, calendarDiv, textColor);
+
+                const dateStr = document.createElement('div');
+                dateStr.className = 'invite-date';
+                dateStr.textContent = `${day} ${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][monthInt]} ${year}`;
+                calendarSectionDiv.appendChild(dateStr);
+
+                wizardPreviewCard.appendChild(calendarSectionDiv);
+            }
+
+            const place = document.getElementById('wizardPlace').value.trim();
+            const address = document.getElementById('wizardAddress').value.trim();
+            if (place || address) {
+                const locationSectionDiv = document.createElement('div');
+                locationSectionDiv.className = 'invite-section';
+
+                const heading = document.createElement('div');
+                heading.className = 'section-heading';
+                heading.textContent = 'Место';
+                locationSectionDiv.appendChild(heading);
+
+                if (place) {
+                    const placeEl = document.createElement('div');
+                    placeEl.className = 'invite-place';
+                    placeEl.textContent = place;
+                    locationSectionDiv.appendChild(placeEl);
+                }
+
+                if (address) {
+                    const addressEl = document.createElement('div');
+                    addressEl.textContent = address;
+                    locationSectionDiv.appendChild(addressEl);
+                }
+
+                wizardPreviewCard.appendChild(locationSectionDiv);
+            }
+
+            const subEl = document.createElement('div');
+            subEl.className = 'invite-sub';
+            subEl.textContent = '';
+            wizardPreviewCard.appendChild(subEl);
+        }
+
+        function mapBorderColor(border) {
+            switch (border) {
+                case 'gold': return '#c9a84c';
+                case 'blue': return '#3498db';
+                case 'red': return '#e74c3c';
+                case 'black': return '#333333';
+                default: return null;
+            }
+        }
+
+        function wizardFinish() {
+            const day = document.getElementById('wizardDay').value || '';
+            const month = document.getElementById('wizardMonth').value || '';
+            const year = document.getElementById('wizardYear').value || '';
+            const place = document.getElementById('wizardPlace').value.trim();
+            const address = document.getElementById('wizardAddress').value.trim();
+
+            customSettings = {
+                borderColor: wizardSelectedBorder === 'none' ? null : mapBorderColor(wizardSelectedBorder),
+                borderWidth: wizardSelectedBorder && wizardSelectedBorder !== 'none' ? 3 : 0,
+                borderStyle: wizardSelectedBorder === 'gold' ? 'double' : 'solid',
+                fontFamily: wizardSelectedFont,
+                textColor: wizardSelectedTextColor || '#333333'
+            };
+
+            inviteTitle.value = 'Приглашение';
+            inviteNames.value = '';
+            inviteSub.value = '';
+            calDay.value = day || '';
+            calMonthSelect.value = month || '';
+            calYear.value = year || '';
+            invitePlace.value = place || '';
+            locationAddress.value = address || '';
+            timingText.value = '';
+            inviteDate.value = (day && month !== '' && year) ? `${day} ${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][parseInt(month)]} ${year}` : '';
+
+            closeWizard();
+
+            if (!templates.find(t => t.id === 'custom')) {
+                templates.push({
+                    id: 'custom',
+                    name: 'Свой',
+                    description: 'Кастомный шаблон',
+                    miniClass: '',
+                    fullClass: 'tpl-custom',
+                    miniTitle: '',
+                    miniNames: '',
+                    miniDate: ''
+                });
+            }
+            openEditor('custom');
+        }
+
         // ===== РЕЖИМ ПРОСМОТРА =====
         function showViewMode(encodedData) {
             try {
                 const data = decodeInvitation(encodedData);
                 applyInvitationData(data);
-                // Переключаем видимость
                 homePage.style.display = 'none';
                 editorPage.classList.remove('active');
                 viewPage.classList.add('active');
-                // Заполняем viewContainer
                 const clone = invitationPreview.cloneNode(true);
                 clone.id = 'viewInvitation';
                 viewContainer.innerHTML = '';
                 viewContainer.appendChild(clone);
-                // Прокрутка наверх
                 window.scrollTo(0, 0);
             } catch (e) {
                 alert('Ошибка загрузки приглашения. Возможно, ссылка повреждена.');
@@ -1085,15 +1595,7 @@
                 const id = hash.replace('#/template/', '');
                 const template = templates.find(t => t.id === id);
                 if (template) {
-                    currentTemplate = template;
-                    homePage.style.display = 'none';
-                    editorPage.classList.add('active');
-                    viewPage.classList.remove('active');
-                    invitationPreview.className = `invitation-card ${template.fullClass}`;
-                    updatePreview();
-                    window.scrollTo(0, 0);
-                    orderForm.classList.remove('active');
-                    orderBtn.textContent = '📩 Заказать';
+                    openEditor(template.id);
                 } else {
                     goHome();
                 }
@@ -1115,8 +1617,12 @@
 
         // Escape для возврата
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && (editorPage.classList.contains('active') || viewPage.classList.contains('active'))) {
-                goHome();
+            if (e.key === 'Escape') {
+                if (wizardModal.classList.contains('active')) {
+                    closeWizard();
+                } else if (editorPage.classList.contains('active') || viewPage.classList.contains('active')) {
+                    goHome();
+                }
             }
         });
     </script>
